@@ -33,6 +33,7 @@ INITIAL_TASK = os.getenv("INITIAL_TASK", os.getenv("FIRST_TASK", ""))
 
 # Model configuration
 TEMPERATURE = float(os.getenv("TEMPERATURE", 0.2))
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", 256))
 
 VERBOSE = (os.getenv("VERBOSE", "false").lower() == "true")
 
@@ -46,9 +47,11 @@ def can_import(module_name):
         return False
 
 print("\033[95m\033[1m"+"\n*****CONFIGURATION*****\n"+"\033[0m\033[0m")
-print(f"Name  : {INSTANCE_NAME}")
-print(f"Mode  : {'alone' if COOPERATIVE_MODE in ['n', 'none'] else 'local' if COOPERATIVE_MODE in ['l', 'local'] else 'distributed' if COOPERATIVE_MODE in ['d', 'distributed'] else 'undefined'}")
-print(f"LLM   : {LLM_MODEL}")
+print(f"Name        : {INSTANCE_NAME}")
+print(f"Mode        : {'alone' if COOPERATIVE_MODE in ['n', 'none'] else 'local' if COOPERATIVE_MODE in ['l', 'local'] else 'distributed' if COOPERATIVE_MODE in ['d', 'distributed'] else 'undefined'}")
+print(f"LLM         : {LLM_MODEL}")
+print(f"TEMPERATURE : {TEMPERATURE}")
+print(f"MAX_TOKENS  : {MAX_TOKENS}")
 
 # Check if we know what we are doing
 assert OBJECTIVE, "\033[91m\033[1m" + "OBJECTIVE environment variable is missing from .env" + "\033[0m\033[0m"
@@ -56,7 +59,7 @@ assert INITIAL_TASK, "\033[91m\033[1m" + "INITIAL_TASK environment variable is m
 
 MODEL_PATH = os.getenv("MODEL_PATH", "models/gpt4all-lora-quantized-ggml.bin")
     
-print(f"GPT4All : {MODEL_PATH}" + "\n")
+print(f"GPT4All     : {MODEL_PATH}" + "\n")
 assert os.path.exists(MODEL_PATH), "\033[91m\033[1m" + f"Model can't be found." + "\033[0m\033[0m"
 
 #CTX_MAX = 2048
@@ -169,7 +172,7 @@ class SingleTaskListStorage:
 # Initialize tasks storage
 tasks_storage = SingleTaskListStorage()
 
-def gpt_call(prompt: str, temperature: float = TEMPERATURE, max_tokens: int = 256):
+def gpt_call(prompt: str, temperature: float = TEMPERATURE, max_tokens: int = MAX_TOKENS):
     result = llm(prompt[:CTX_MAX], echo=True, temperature=temperature, max_tokens=max_tokens)
     return result['choices'][0]['text'][len(prompt):].strip()
 
